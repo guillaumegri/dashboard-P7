@@ -131,48 +131,48 @@ with container_2:
     else:
         st.write("Sélectionnez un tag pour voir le nuage de mots correspondant.")
 
-# MODEL_NAME = "avsolatorio/GIST-small-Embedding-v0"
+MODEL_NAME = "avsolatorio/GIST-small-Embedding-v0"
 
 # # Titre de l'application
 # st.title("Interface pour Consommer une API")
 
-# # Entrée utilisateur pour l'API (par exemple, un paramètre)
-# titre = st.text_input("Titre", "")
-# question = st.text_input("Question", "")
+# Entrée utilisateur pour l'API (par exemple, un paramètre)
+titre = st.text_input("Titre", "")
+question = st.text_input("Question", "")
 
 # # URL de l'API
 # # api_url = "https://apitagspredict-dvhyeehxa8c3avah.germanywestcentral-01.azurewebsites.net"
 # # # api_url = 'http://localhost:8000'
 
 # # Bouton pour interroger l'API
-# if st.button("Envoyer la requête"):
-#     route = "/predict"
-    # if question:
+if st.button("Envoyer la requête"):
+    route = "/predict"
+    if question:
 
-        # data = {
-        #     "text": [titre + " " + question]
-        # }
+        data = {
+            "text": [titre + " " + question]
+        }
 
-        # embedding_model = SentenceTransformer(
-        #     MODEL_NAME
-        # )
+        embedding_model = SentenceTransformer(
+            MODEL_NAME
+        )
         
-        # # X_batches = [documents[i:i + batch_size] 
-        # #             for i in range(0, len(documents), batch_size)]
+        # X_batches = [documents[i:i + batch_size] 
+        #             for i in range(0, len(documents), batch_size)]
         
-        # X = embedding_model.encode(data["text"])
+        X = embedding_model.encode(data["text"])
         
-        # with open('model.pkl', 'rb') as file_model:
-        #     model = pickle.load(file_model)
+        with open('model.pkl', 'rb') as file_model:
+            model = pickle.load(file_model)
 
-        # with open('mlb.pkl', 'rb') as mlb_file:
-        #     mlb = pickle.load(mlb_file)
+        with open('mlb.pkl', 'rb') as mlb_file:
+            mlb = pickle.load(mlb_file)
 
-        # predictions = model.predict(X)
+        predictions = model.predict(X)
 
-        # tags = mlb.inverse_transform(predictions)    
-        # tags = [tag for sublist in tags for tag in sublist]
+        tags = mlb.inverse_transform(predictions)    
+        tags = [tag for sublist in tags for tag in sublist]
 
-        # st.write(f"Tags : {', '.join(tags)}")
-    # else:
-    #     st.warning("Veuillez entrer un paramètre.")
+        st.write(f"Tags : {', '.join(tags)}")
+    else:
+        st.warning("Veuillez entrer un paramètre.")
