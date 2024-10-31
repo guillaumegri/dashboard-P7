@@ -1,15 +1,16 @@
 import streamlit as st
 import pickle
 import joblib
-# from sentence_transformers import SentenceTransformer
 import pandas as pd
 import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import time
+
 # Configuration du layout
 st.set_page_config(layout="wide")
 
+#Réduction des padding de container
 st.markdown(
     """
     <style>
@@ -31,6 +32,7 @@ start_time = time.time()
 df = load_from_chunks('df_preprocessed_chunk', num_chunks=5)
 
 loading_time = time.time() - start_time
+
 # Calcul des statistiques
 num_questions = df.shape[0]
 tags_flattened = [tag for sublist in df['processed_Tags'] for tag in sublist]
@@ -53,9 +55,6 @@ count_time = time.time() - start_time - loading_time
 text = ' '.join([' '.join(row.processed_Title_text) + ' ' +  ' '.join(row.processed_Body_text) for row in echantillon.itertuples()])
 print(loading_time, count_time)
 
-# Colonne de gauche
-
-# Colonne de droite
 st.title("Dashboard des Questions de StackOverflow")
 
 # Graphique des fréquences de tags
@@ -68,14 +67,6 @@ fig_tags.update_layout(
     xaxis={'tickfont': {'size': 18}},  # Taille des ticks de l'axe X
     yaxis={'tickfont': {'size': 18}}   # Taille des ticks de l'axe Y
 )
-
-
-# # WordCloud des mots clés
-# wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-# plt.figure(figsize=(10, 5))
-# plt.imshow(wordcloud, interpolation='bilinear')
-# plt.axis('off')
-# st.pyplot(plt)
 
 # Liste de tous les tags uniques
 all_tags = sorted(set(tag for tags in df['processed_Tags'] for tag in tags))
@@ -130,49 +121,3 @@ with container_2:
         st.pyplot(fig)
     else:
         st.write("Sélectionnez un tag pour voir le nuage de mots correspondant.")
-
-MODEL_NAME = "avsolatorio/GIST-small-Embedding-v0"
-
-# # Titre de l'application
-# st.title("Interface pour Consommer une API")
-
-# Entrée utilisateur pour l'API (par exemple, un paramètre)
-# titre = st.text_input("Titre", "")
-# question = st.text_input("Question", "")
-
-# # URL de l'API
-# # api_url = "https://apitagspredict-dvhyeehxa8c3avah.germanywestcentral-01.azurewebsites.net"
-# # # api_url = 'http://localhost:8000'
-
-# # # Bouton pour interroger l'API
-# if st.button("Envoyer la requête"):
-#     route = "/predict"
-#     if question:
-
-#         data = {
-#             "text": [titre + " " + question]
-#         }
-
-#         embedding_model = SentenceTransformer(
-#             MODEL_NAME
-#         )
-        
-#         # X_batches = [documents[i:i + batch_size] 
-#         #             for i in range(0, len(documents), batch_size)]
-        
-#         X = embedding_model.encode(data["text"])
-        
-#         with open('model.pkl', 'rb') as file_model:
-#             model = pickle.load(file_model)
-
-#         with open('mlb.pkl', 'rb') as mlb_file:
-#             mlb = pickle.load(mlb_file)
-
-#         predictions = model.predict(X)
-
-#         tags = mlb.inverse_transform(predictions)    
-#         tags = [tag for sublist in tags for tag in sublist]
-
-#         st.write(f"Tags : {', '.join(tags)}")
-#     else:
-#         st.warning("Veuillez entrer un paramètre.")
