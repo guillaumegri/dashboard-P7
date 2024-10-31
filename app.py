@@ -1,7 +1,7 @@
 import streamlit as st
 import pickle
 import joblib
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 import pandas as pd
 import plotly.express as px
 from wordcloud import WordCloud
@@ -144,35 +144,35 @@ question = st.text_input("Question", "")
 # # api_url = "https://apitagspredict-dvhyeehxa8c3avah.germanywestcentral-01.azurewebsites.net"
 # # # api_url = 'http://localhost:8000'
 
-# # Bouton pour interroger l'API
-if st.button("Envoyer la requête"):
-    route = "/predict"
-    if question:
+# # # Bouton pour interroger l'API
+# if st.button("Envoyer la requête"):
+#     route = "/predict"
+#     if question:
 
-        data = {
-            "text": [titre + " " + question]
-        }
+#         data = {
+#             "text": [titre + " " + question]
+#         }
 
-        embedding_model = SentenceTransformer(
-            MODEL_NAME
-        )
+#         embedding_model = SentenceTransformer(
+#             MODEL_NAME
+#         )
         
-        # X_batches = [documents[i:i + batch_size] 
-        #             for i in range(0, len(documents), batch_size)]
+#         # X_batches = [documents[i:i + batch_size] 
+#         #             for i in range(0, len(documents), batch_size)]
         
-        X = embedding_model.encode(data["text"])
+#         X = embedding_model.encode(data["text"])
         
-        with open('model.pkl', 'rb') as file_model:
-            model = pickle.load(file_model)
+#         with open('model.pkl', 'rb') as file_model:
+#             model = pickle.load(file_model)
 
-        with open('mlb.pkl', 'rb') as mlb_file:
-            mlb = pickle.load(mlb_file)
+#         with open('mlb.pkl', 'rb') as mlb_file:
+#             mlb = pickle.load(mlb_file)
 
-        predictions = model.predict(X)
+#         predictions = model.predict(X)
 
-        tags = mlb.inverse_transform(predictions)    
-        tags = [tag for sublist in tags for tag in sublist]
+#         tags = mlb.inverse_transform(predictions)    
+#         tags = [tag for sublist in tags for tag in sublist]
 
-        st.write(f"Tags : {', '.join(tags)}")
-    else:
-        st.warning("Veuillez entrer un paramètre.")
+#         st.write(f"Tags : {', '.join(tags)}")
+#     else:
+#         st.warning("Veuillez entrer un paramètre.")
