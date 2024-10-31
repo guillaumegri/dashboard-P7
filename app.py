@@ -137,8 +137,8 @@ MODEL_NAME = "avsolatorio/GIST-small-Embedding-v0"
 # st.title("Interface pour Consommer une API")
 
 # Entrée utilisateur pour l'API (par exemple, un paramètre)
-titre = st.text_input("Titre", "")
-question = st.text_input("Question", "")
+# titre = st.text_input("Titre", "")
+# question = st.text_input("Question", "")
 
 # # URL de l'API
 # # api_url = "https://apitagspredict-dvhyeehxa8c3avah.germanywestcentral-01.azurewebsites.net"
