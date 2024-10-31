@@ -1,7 +1,7 @@
 import streamlit as st
 import pickle
 import joblib
-from sentence_transformers import SentenceTransformer
+#from sentence_transformers import SentenceTransformer
 import pandas as pd
 import plotly.express as px
 from wordcloud import WordCloud
