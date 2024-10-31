@@ -1,12 +1,24 @@
 import streamlit as st
 import pickle
 import joblib
-# from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer
 import pandas as pd
 import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import time
+# Configuration du layout
+st.set_page_config(layout="wide")
+
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding: 1.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
 
 def load_from_chunks(output_prefix, num_chunks):
     data = b""
@@ -14,20 +26,7 @@ def load_from_chunks(output_prefix, num_chunks):
         with open(f"{output_prefix}_part{i}.pkl", 'rb') as chunk_file:
             data += chunk_file.read()
     return pickle.loads(data)
-# # Supposons que vous avez un DataFrame avec les colonnes spécifiées
-# data = {
-#     "Title_text": ["Titre 1", "Titre 2", "Titre 3"],
-#     "Body_text": ["Question 1", "Question 2", "Question 3"],
-#     "CreationDate": ["2024-01-01", "2024-01-02", "2024-01-03"],
-#     "Tags": [["tag1", "tag2"], ["tag1", "tag3"], ["tag2", "tag4"]],
-#     "processed_Title_text": ["Titre1", "Titre2", "Titre3"],
-#     "processed_Body_text": ["Question1", "Question2", "Question3"],
-# }
 
-# df = pd.DataFrame(data)
-
-# with open('df_preprocessed.pkl', 'rb') as file:
-#     df = pickle.load(file)
 start_time = time.time()
 df = load_from_chunks('df_preprocessed_chunk', num_chunks=5)
 
@@ -47,29 +46,14 @@ df['dominant_tag'] = df['processed_Tags'].apply(lambda x: max(x, key=lambda tag:
 
 # Échantillon stratifié selon le tag dominant
 echantillon = df.groupby('dominant_tag').apply(lambda x: x.sample(frac=0.05, random_state=42)).reset_index(drop=True)
+nb_tags = len(set(tags_flattened))
 
-print(len(set(tags_flattened)))
 count_time = time.time() - start_time - loading_time
 
 text = ' '.join([' '.join(row.processed_Title_text) + ' ' +  ' '.join(row.processed_Body_text) for row in echantillon.itertuples()])
-# print(text)
 print(loading_time, count_time)
 
-# Configuration du layout
-st.set_page_config(layout="wide")
-
 # Colonne de gauche
-with st.sidebar:
-    st.header("Description des Données")
-    st.write(f"**Nombre de questions :** {num_questions}")
-
-    # Affichage des titres, corps et tags
-    # for index, row in df.iterrows():
-    #     st.subheader(f"Titre : {row['Title_text']}")
-    #     st.write(f"Question : {row['Body_text']}")
-    #     st.write(f"Tags : {', '.join(row['Tags'])}")
-    #     st.write(f"Date de Création : {row['CreationDate']}")
-    #     st.markdown("---")  # Séparateur
 
 # Colonne de droite
 st.title("Dashboard des Questions de StackOverflow")
@@ -84,7 +68,7 @@ fig_tags.update_layout(
     xaxis={'tickfont': {'size': 18}},  # Taille des ticks de l'axe X
     yaxis={'tickfont': {'size': 18}}   # Taille des ticks de l'axe Y
 )
-st.plotly_chart(fig_tags)
+
 
 # # WordCloud des mots clés
 # wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
@@ -96,37 +80,57 @@ st.plotly_chart(fig_tags)
 # Liste de tous les tags uniques
 all_tags = sorted(set(tag for tags in df['processed_Tags'] for tag in tags))
 
-# Interface utilisateur : sélection de tags
-selected_tags = st.multiselect("Choisissez un ou plusieurs tags", options=all_tags)
-
-# Filtrer les données en fonction des tags sélectionnés
-if selected_tags:
-    filtered_data = df[df['processed_Tags'].apply(lambda tags: any(tag in tags for tag in selected_tags))]
-    # Concaténer les textes filtrés
-    text = ' '.join([' '.join(row.processed_Title_text) + ' ' +  ' '.join(row.processed_Body_text) for row in filtered_data.itertuples()])
-    
-    # Générer le WordCloud
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-    
-    # Afficher le WordCloud
-    fig, ax = plt.subplots()
-    ax.imshow(wordcloud, interpolation='bilinear')
-    ax.axis("off")
-    st.pyplot(fig)
-else:
-    st.write("Sélectionnez un tag pour voir le nuage de mots correspondant.")
+df['Longueur de titre'] = df['Title_text'].str.len()
+df['Longueur des bodys'] = df['Body_text'].str.len()
 
 # Histogramme des longueurs de questions
-df['Longueur de titre'] = df['Title_text'].str.len()
 fig_length = px.histogram(df, x='Longueur de titre', title="Distribution de la Longueur des Titres (en caractères)")
 fig_length.update_layout(
-    title={'text': "Fréquence des Tags", 'font_size': 24},  # Taille du titre
-    xaxis_title={'text': 'processed_Tags', 'font': {'size': 20}},  # Taille du label de l'axe X
+    title={'text': "Distribution de la Longueur des Titres (en caractères)", 'font_size': 24},  # Taille du titre
+    xaxis_title={'text': 'Longueur des titres', 'font': {'size': 20}},  # Taille du label de l'axe X
     yaxis_title={'text': 'Fréquence', 'font': {'size': 20}},  # Taille du label de l'axe Y
     xaxis={'tickfont': {'size': 18}},  # Taille des ticks de l'axe X
     yaxis={'tickfont': {'size': 18}}   # Taille des ticks de l'axe Y
 )
-st.plotly_chart(fig_length)
+
+container_1 = st.container()
+container_2 = st.container()
+
+col_1, col_2 = container_1.columns([1, 1])
+
+with st.sidebar:
+    st.header("Description des Données")
+    st.write(f"Nous avons travaillé sur un ensemble de {num_questions} questions, contenant le titre et le corps des questions et pour chacune d'elle 5 tags.")
+    st.write(f"Les longueurs moyennes des titres sont de {df['Longueur de titre'].mean():.0f} caractères et celles des questions sont de {df['Longueur des bodys'].mean():.0f} caractères.")
+    st.write(f"On retrouve {nb_tags} tags distincts dans l'ensemble des questions")
+
+with col_1:
+    st.plotly_chart(fig_tags)
+
+with col_2:
+    st.plotly_chart(fig_length)
+
+with container_2:
+    # Interface utilisateur : sélection de tags
+    selected_tags = st.multiselect("Choisissez un ou plusieurs tags", options=all_tags)
+
+    # Filtrer les données en fonction des tags sélectionnés
+    if selected_tags:
+        filtered_data = df[df['processed_Tags'].apply(lambda tags: any(tag in tags for tag in selected_tags))]
+        # Concaténer les textes filtrés
+        text = ' '.join([' '.join(row.processed_Title_text) + ' ' +  ' '.join(row.processed_Body_text) for row in filtered_data.itertuples()])
+        
+        # Générer le WordCloud
+        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+        
+        # Afficher le WordCloud
+        fig, ax = plt.subplots()
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
+    else:
+        st.write("Sélectionnez un tag pour voir le nuage de mots correspondant.")
+
 # MODEL_NAME = "avsolatorio/GIST-small-Embedding-v0"
 
 # # Titre de l'application
